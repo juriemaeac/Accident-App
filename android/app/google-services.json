@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "754573375088",
+    "project_id": "accidenttracker-df5f9",
+    "storage_bucket": "accidenttracker-df5f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:754573375088:android:a985b4099d1f0cdac166b5",
+        "android_client_info": {
+          "package_name": "com.example.accidentapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr_z7f7rS2zNjVCmMsuQ5ZF7le-sQPKgc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
