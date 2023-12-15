@@ -1,6 +1,8 @@
 import 'package:accidentapp/models/userData.dart';
+import 'package:accidentapp/services/firebase_api.dart';
 import 'package:accidentapp/services/userDataService.dart';
 import 'package:accidentapp/viewmodels/userViewModel.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -24,10 +26,59 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
   int currentIndex = 0;
   List<Widget> pages = [Home(), Users()];
 
+  List<String> destinationTokens = [];
+
+  void getDestinationTokens() {
+    FirebaseFirestore.instance
+        .collection('userTokens')
+        .get()
+        .then((QuerySnapshot querySnapshot) {
+      for (var doc in querySnapshot.docs) {
+        setState(() {
+          destinationTokens.add(doc["token"]);
+        });
+      }
+    });
+  }
+
+  void listenForNewAlerts() {
+    FirebaseFirestore.instance
+        .collection('AlertNotifs')
+        .snapshots()
+        .listen((QuerySnapshot querySnapshot) {
+      for (var doc in querySnapshot.docChanges) {
+        if (doc.type == DocumentChangeType.added) {
+          sendNotification(doc.doc);
+        }
+      }
+    });
+  }
+
+  Future<void> sendNotification(DocumentSnapshot document) async {
+    try {
+      // Extract fields from the document
+      String title = document['title'];
+      String body = document['body'];
+      String timestamp = document['timestamp'];
+
+      // Remove duplicate tokens
+      destinationTokens = destinationTokens.toSet().toList();
+
+      // Send notifications to all destination tokens
+      for (var destination in destinationTokens) {
+        FirebaseApi().sendPushMessage(destination, title, body, timestamp);
+      }
+    } catch (e) {
+      print("Error sending notification: $e");
+    }
+  }
+
   @override
   void initState() {
     super.initState();
     userViewModel = UserViewModel();
+    getDestinationTokens();
+    listenForNewAlerts();
   }
 
   @override
@@ -66,7 +117,7 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                             height: 30,
                             child: Image.asset(
                                 "assets/avatars/${snapshot.data?.userAvatar}"),
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                                 color: Colors.black,
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(50))),
@@ -77,7 +128,7 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                                 snapshot.data == null
                                     ? ""
                                     : snapshot.data!.nickname,
-                                style: TextStyle(color: Colors.black)),
+                                style: const TextStyle(color: Colors.black)),
                           ),
                           GestureDetector(
                               onTap: () async {
@@ -86,13 +137,13 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                                             .instance.currentUser!.uid))
                                     .then((_) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
+                                      const SnackBar(
                                           content:
                                               Text("UID copied to clipboard")));
                                 });
                               },
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 8),
+                              child: const Padding(
+                                padding: EdgeInsets.only(left: 8),
                                 child: Icon(
                                   Icons.copy,
                                 ),
@@ -106,22 +157,21 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                               child: ElevatedButton(
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
-                                        Color.fromARGB(255, 56, 56, 56),
-                                    shape: new RoundedRectangleBorder(
-                                      borderRadius:
-                                          new BorderRadius.circular(30.0),
+                                        const Color.fromARGB(255, 56, 56, 56),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(30.0),
                                     ),
                                   ),
                                   onPressed: () {
                                     FirebaseAuth.instance.signOut();
                                   },
-                                  child: Text(
+                                  child: const Text(
                                     "Logout",
                                     style: TextStyle(color: Colors.white),
                                   )),
                             )
-                          : Padding(
-                              padding: const EdgeInsets.all(8.0),
+                          : const Padding(
+                              padding: EdgeInsets.all(8.0),
                               child: Text("Accident Tracker",
                                   style: TextStyle(
                                       color: Color.fromARGB(255, 241, 81, 6),
@@ -141,9 +191,9 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
                                 backgroundColor:
-                                    Color.fromARGB(255, 56, 56, 56),
-                                shape: new RoundedRectangleBorder(
-                                  borderRadius: new BorderRadius.circular(30.0),
+                                    const Color.fromARGB(255, 56, 56, 56),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(30.0),
                                 ),
                               ),
                               onPressed: () {
@@ -174,7 +224,7 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                     ),
                     child: Container(
                       decoration: BoxDecoration(
-                          color: Color.fromARGB(255, 56, 56, 56),
+                          color: const Color.fromARGB(255, 56, 56, 56),
                           borderRadius: BorderRadius.circular(20)),
                       child: BottomNavigationBar(
                           backgroundColor: Colors.transparent,
@@ -187,9 +237,10 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                           },
                           showSelectedLabels: true,
                           showUnselectedLabels: false,
-                          selectedItemColor: Color.fromARGB(255, 241, 81, 6),
+                          selectedItemColor:
+                              const Color.fromARGB(255, 241, 81, 6),
                           unselectedItemColor: Colors.white,
-                          items: [
+                          items: const [
                             BottomNavigationBarItem(
                                 icon: Icon(Icons.dashboard),
                                 label: "Dashboard"),
@@ -203,7 +254,7 @@ class _AuthenticatedLayoutState extends State<AuthenticatedLayout> {
                 ));
           }
 
-          return Scaffold(
+          return const Scaffold(
             backgroundColor: Colors.white,
             body: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -233,15 +284,15 @@ class AddRelatives extends StatefulWidget {
 }
 
 class _AddRelativesState extends State<AddRelatives> {
-  UserDataService userDataService = new UserDataService();
-  RelationShipService relationShipService = new RelationShipService();
+  UserDataService userDataService = UserDataService();
+  RelationShipService relationShipService = RelationShipService();
   String? relationship = null;
   String? uid = "";
   bool? isFound = null;
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.only(
               topLeft: Radius.circular(20), topRight: Radius.circular(20))),
@@ -253,7 +304,7 @@ class _AddRelativesState extends State<AddRelatives> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             TextFormField(
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
               onChanged: (data) async {
                 if (data == null || data == "") {
                   setState(() {
@@ -268,7 +319,7 @@ class _AddRelativesState extends State<AddRelatives> {
                   uid = fnd!.uid;
                 });
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                   hintText: "Insert UID",
                   hintStyle: TextStyle(color: Colors.white),
                   focusColor: Color.fromARGB(255, 241, 81, 6),
@@ -278,7 +329,7 @@ class _AddRelativesState extends State<AddRelatives> {
                   filled: true,
                   border: OutlineInputBorder(
                       borderRadius: BorderRadius.all(Radius.circular(10)))),
-              cursorColor: Color.fromARGB(255, 241, 81, 6),
+              cursorColor: const Color.fromARGB(255, 241, 81, 6),
             ),
             Visibility(
               visible: isFound != null,
@@ -296,7 +347,7 @@ class _AddRelativesState extends State<AddRelatives> {
                 crossAxisCount: 3,
                 children: <Widget>[
                   ChoiceChip(
-                    label: Text("Father"),
+                    label: const Text("Father"),
                     selectedColor: Colors.amber,
                     onSelected: (data) {
                       if (data) {
@@ -309,7 +360,7 @@ class _AddRelativesState extends State<AddRelatives> {
                     selected: relationship == "Father",
                   ),
                   ChoiceChip(
-                    label: Text("Mother"),
+                    label: const Text("Mother"),
                     selectedColor: Colors.amber,
                     selected: relationship == "Mother",
                     onSelected: (data) {
@@ -322,7 +373,7 @@ class _AddRelativesState extends State<AddRelatives> {
                     },
                   ),
                   ChoiceChip(
-                    label: Text("Sibling"),
+                    label: const Text("Sibling"),
                     selectedColor: Colors.amber,
                     selected: relationship == "Sibling",
                     onSelected: (data) {
@@ -335,7 +386,7 @@ class _AddRelativesState extends State<AddRelatives> {
                     },
                   ),
                   ChoiceChip(
-                    label: Text("Niece"),
+                    label: const Text("Niece"),
                     selectedColor: Colors.amber,
                     selected: relationship == "Niece",
                     onSelected: (data) {
@@ -348,7 +399,7 @@ class _AddRelativesState extends State<AddRelatives> {
                     },
                   ),
                   ChoiceChip(
-                    label: Text("Nephew"),
+                    label: const Text("Nephew"),
                     selectedColor: Colors.amber,
                     selected: relationship == "Nephew",
                     onSelected: (data) {
@@ -370,18 +421,18 @@ class _AddRelativesState extends State<AddRelatives> {
                   barrierDismissible: true,
                   context: context,
                   builder: (BuildContext context) {
-                    return AlertDialog(
-                        title: const Text('Note'),
+                    return const AlertDialog(
+                        title: Text('Note'),
                         content: Text(
                             "Wait for the other person to accept your request"));
                   },
                 );
               },
-              child: Text("Add", style: TextStyle(color: Colors.white)),
+              child: const Text("Add", style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
-                backgroundColor: Color.fromARGB(255, 56, 56, 56),
-                shape: new RoundedRectangleBorder(
-                  borderRadius: new BorderRadius.circular(30.0),
+                backgroundColor: const Color.fromARGB(255, 56, 56, 56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
                 ),
               ),
             )

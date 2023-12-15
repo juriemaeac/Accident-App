@@ -158,6 +158,10 @@ http_parser
 2.12
 file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2/
 file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/http_parser-4.0.2/lib/
+intl
+3.0
+file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0/
+file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/intl-0.19.0/lib/
 js
 2.19
 file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/js-0.6.7/
@@ -340,8 +344,8 @@ file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.4.2/
 file:///C:/Users/jurie/AppData/Local/Pub/Cache/hosted/pub.dev/xml-6.4.2/lib/
 accidentapp
 2.19
-file:///C:/Users/jurie/Desktop/flutterapp/
-file:///C:/Users/jurie/Desktop/flutterapp/lib/
+file:///C:/Users/jurie/Desktop/Accident-App/
+file:///C:/Users/jurie/Desktop/Accident-App/lib/
 sky_engine
 3.2
 file:///C:/flutter/bin/cache/pkg/sky_engine/

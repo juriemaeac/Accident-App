@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:accidentapp/views/notification/trigger_notif.dart';
+import 'package:accidentapp/views/notification/notification_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -157,20 +157,31 @@ class _HomeState extends State<Home> {
               )),
           Align(
             alignment: Alignment.topLeft,
-            child: GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  ctx,
-                  MaterialPageRoute(builder: (context) => TriggerNotifTest()),
-                );
-              },
-              child: Text(
-                "Activity",
-                style: TextStyle(
-                  fontSize: 24,
-                  color: Color.fromARGB(255, 241, 81, 6),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Activity",
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Color.fromARGB(255, 241, 81, 6),
+                  ),
                 ),
-              ),
+                //notif bell button
+                IconButton(
+                  onPressed: () {
+                    Navigator.push(
+                      ctx,
+                      MaterialPageRoute(
+                          builder: (context) => NotificationScreen()),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.notifications,
+                    color: Color.fromARGB(255, 241, 81, 6),
+                  ),
+                ),
+              ],
             ),
           ),
           Expanded(

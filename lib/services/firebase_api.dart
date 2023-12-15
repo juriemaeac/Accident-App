@@ -3,7 +3,6 @@
 import 'dart:convert';
 import 'package:accidentapp/main.dart';
 import 'package:accidentapp/views/notification/view_notification.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -35,12 +34,12 @@ class FirebaseApi {
     if (message == null) return;
 
     //get the transaction id from the notification
-    final notificationId = message.data['notificationId'];
+    final timestamp = message.data['timestamp'];
 
     navigatorKey.currentState?.push(
       MaterialPageRoute(
         builder: (context) => ViewNotification(
-          notificationId: notificationId,
+          timestamp: timestamp,
         ),
         settings: RouteSettings(
           arguments: message,
@@ -48,7 +47,7 @@ class FirebaseApi {
       ),
     );
 
-    print("Transaction ID From API: $notificationId");
+    print("Transaction ID From API: $timestamp");
   }
 
   Future initLocalNotifications() async {
@@ -104,7 +103,7 @@ class FirebaseApi {
   }
 
   void sendPushMessage(
-      String token, String title, String body, String notificationId) async {
+      String token, String title, String body, String timestamp) async {
     try {
       await http.post(Uri.parse('https://fcm.googleapis.com/fcm/send'),
           headers: <String, String>{
@@ -114,7 +113,7 @@ class FirebaseApi {
           body: jsonEncode(
             <String, dynamic>{
               'notification': <String, dynamic>{
-                'notificationId': notificationId,
+                'timestamp': timestamp,
                 'title': title,
                 'body': body,
                 'android_channel_id': 'high_importance_channel_id',
@@ -124,7 +123,7 @@ class FirebaseApi {
                 'click_action': 'FLUTTER_NOTIFICATION_CLICK',
                 //'id': '1',
                 'status': 'done',
-                'notificationId': notificationId,
+                'timestamp': timestamp,
                 'title': title,
                 'body': body,
               },
@@ -148,55 +147,4 @@ class FirebaseApi {
     initPushNotifications();
     initLocalNotifications();
   }
-
-  //add notification to firebase notifications collection
-  Future<void> addNotification(
-      String title, String body, String notificationId) async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('notifications')
-          .doc(notificationId)
-          .set({
-        'notificationId': notificationId,
-        'title': title,
-        'body': body,
-      });
-      print('Adding notification...');
-    } catch (e) {
-      print(e);
-    }
-  }
-
-  //get all user tokens
-  // Future<List<String>> getAllUserTokens() async {
-  //   List<String> tokens = [];
-  //   try {
-  //     await FirebaseFirestore.instance
-  //         .collection('userTokens')
-  //         .get()
-  //         .then((QuerySnapshot querySnapshot) {
-  //       querySnapshot.docs.forEach((doc) {
-  //         tokens.add(doc["token"]);
-  //       });
-  //     });
-  //     print('Getting all user tokens...');
-  //     return tokens;
-  //   } catch (e) {
-  //     print(e);
-  //     return [];
-  //   }
-  // }
-
-  // //add user token to userTokens collection
-  // Future<void> addUserTokens(String token, String userId) async {
-  //   try {
-  //     await FirebaseFirestore.instance
-  //         .collection('userTokens')
-  //         .doc(userId)
-  //         .set({"token": token});
-  //     print('Adding user tokens...');
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
 }

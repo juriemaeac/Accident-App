@@ -1,11 +1,11 @@
 // ignore_for_file: use_build_context_synchronously, avoid_print, prefer_interpolation_to_compose_strings
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ViewNotification extends StatefulWidget {
-  final String notificationId;
-  const ViewNotification({super.key, required this.notificationId});
+  final String timestamp;
+  const ViewNotification({Key? key, required this.timestamp}) : super(key: key);
 
   static const route = '/viewNotification';
 
@@ -14,57 +14,43 @@ class ViewNotification extends StatefulWidget {
 }
 
 class _ViewNotificationState extends State<ViewNotification> {
-  String userId = FirebaseAuth.instance.currentUser!.uid;
-  String mtoken = "";
-  String name = "";
   String title = "";
   String bodyNotif = "";
-  String notifId = "";
+  String timestamp = "";
 
   @override
   void initState() {
     super.initState();
-    getUser();
-  }
-
-  getUser() {
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .get()
-        .then((DocumentSnapshot documentSnapshot) {
-      if (documentSnapshot.exists) {
-        setState(() {
-          name = documentSnapshot['firstName'] +
-              " " +
-              documentSnapshot['lastName'];
-        });
-      } else {}
-    });
     getNotifDetails();
   }
 
   getNotifDetails() {
     final notification = FirebaseFirestore.instance
-        .collection('notifications')
-        .doc(userId)
-        .collection('notifications')
+        .collection('AlertNotifs')
+        .doc(widget.timestamp)
         .get();
 
-    notification.then((value) {
-      for (var element in value.docs) {
-        if (element['notificationId'] == widget.notificationId) {
-          setState(() {
-            notifId = element.id;
-            bodyNotif = element['body'];
-          });
-        }
+    notification.then((DocumentSnapshot value) {
+      if (value.exists) {
+        setState(() {
+          title = value['title'];
+          bodyNotif = value['body'];
+          timestamp = value['timestamp'];
+        });
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    int unixTimestamp = int.parse(timestamp);
+
+    DateTime dateTime =
+        DateTime.fromMillisecondsSinceEpoch(unixTimestamp * 1000);
+
+    // Format DateTime
+    String formattedTimestamp =
+        "${DateFormat('MMMM dd, yyyy').format(dateTime)} ${DateFormat('hh:mm a').format(dateTime)}";
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -101,35 +87,70 @@ class _ViewNotificationState extends State<ViewNotification> {
               const SizedBox(height: 20),
               //display the notification details here
               Container(
-                padding: const EdgeInsets.only(
-                  top: 20,
-                  left: 20,
-                  right: 30,
-                ),
+                padding: const EdgeInsets.all(30),
+                width: MediaQuery.of(context).size.width,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      notifId,
-                      style: const TextStyle(
-                        fontSize: 16,
-                      ),
-                    ),
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
+                    RichText(
+                      text: TextSpan(
+                        text: 'Notification Title: ',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: title,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Text(
-                      bodyNotif,
-                      style: const TextStyle(
-                        fontSize: 16,
+                    RichText(
+                      text: TextSpan(
+                        text: 'Notification Body: ',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: bodyNotif,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),
+                    RichText(
+                      text: TextSpan(
+                        text: 'Date: ',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Colors.black,
+                        ),
+                        children: [
+                          TextSpan(
+                            text: formattedTimestamp,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

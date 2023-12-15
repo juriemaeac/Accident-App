@@ -89,7 +89,7 @@ class _UserRowState extends State<UserRow> {
             height: 50,
             width: 50,
             child: Image.asset("assets/avatars/${widget.user.userAvatar}"),
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
                 color: Colors.black,
                 borderRadius: BorderRadius.all(Radius.circular(200))),
           ),
@@ -111,27 +111,27 @@ class _UserRowState extends State<UserRow> {
                   builder: (BuildContext ctx) {
                     return AlertDialog(
                       title: const Text('Notice'),
-                      content: Text(
+                      content: const Text(
                           "Are you sure you want to remove this user from relatives?"),
                       actions: [
                         ElevatedButton(
                             onPressed: () {
                               Navigator.of(ctx).pop();
                             },
-                            child: Text("Cancel")),
+                            child: const Text("Cancel")),
                         ElevatedButton(
                             onPressed: () {
                               userViewModel.removeRelative(widget.user);
                               Navigator.of(ctx).pop();
                             },
-                            child: Text("Proceed"))
+                            child: const Text("Proceed"))
                       ],
                     );
                   },
                 );
               },
-              child: Padding(
-                padding: const EdgeInsets.only(right: 8.0),
+              child: const Padding(
+                padding: EdgeInsets.only(right: 8.0),
                 child: Text("Delete"),
               )),
           Switch(
@@ -171,32 +171,34 @@ class _ForApprovalState extends State<ForApproval> {
                 Expanded(
                     child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 56, 56, 56),
-                          shape: new RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(30.0),
+                          backgroundColor:
+                              const Color.fromARGB(255, 56, 56, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
                         onPressed: () {
                           Provider.of<UserViewModel>(context, listen: false)
                               .approved(widget.rel);
                         },
-                        child: Text(
+                        child: const Text(
                           "Accept",
                           style: TextStyle(color: Colors.white),
                         ))),
                 Expanded(
                     child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Color.fromARGB(255, 56, 56, 56),
-                          shape: new RoundedRectangleBorder(
-                            borderRadius: new BorderRadius.circular(30.0),
+                          backgroundColor:
+                              const Color.fromARGB(255, 56, 56, 56),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30.0),
                           ),
                         ),
                         onPressed: () {
                           Provider.of<UserViewModel>(context, listen: false)
                               .reject(widget.rel.relID as String, widget.rel);
                         },
-                        child: Text(
+                        child: const Text(
                           "Reject",
                           style: TextStyle(color: Colors.white),
                         )))
